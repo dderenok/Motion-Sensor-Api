@@ -3,6 +3,7 @@ package smart.home.project.service
 import org.springframework.stereotype.Service
 import smart.home.project.model.Light
 import smart.home.project.repository.LightRepository
+import javax.persistence.NonUniqueResultException
 import javax.transaction.Transactional
 
 @Service
@@ -14,7 +15,13 @@ class LightService(private val lightRepository: LightRepository) {
     fun findLightByStatus(status: Boolean) = lightRepository.findByLightStatus(status)
 
     @Transactional
-    fun createLight(light: Light) = lightRepository.save(light)
+    fun createLight(light: Light) {
+        try {
+            lightRepository.findByName(light.name!!)
+        } catch(ex: Exception) { throw NonUniqueResultException() }
+
+        lightRepository.save(light)
+    }
 
     @Transactional
     fun updateLightStatus(id: Long) {
