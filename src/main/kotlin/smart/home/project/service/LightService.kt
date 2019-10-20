@@ -1,7 +1,6 @@
 package smart.home.project.service
 
 import org.springframework.stereotype.Service
-import smart.home.project.config.exception.LightNotFoundException
 import smart.home.project.model.Light
 import smart.home.project.repository.LightRepository
 import javax.transaction.Transactional
@@ -18,9 +17,9 @@ class LightService(private val lightRepository: LightRepository) {
     fun createLight(light: Light) = lightRepository.save(light)
 
     @Transactional
-    fun changeLightStatus(id: Long) {
+    fun updateLightStatus(id: Long) {
         val light = lightRepository.findById(id)
-        light.get().lightStatus = light.get().lightStatus
+        light.get().lightStatus = !light.get().lightStatus
         lightRepository.save(light)
     }
 
