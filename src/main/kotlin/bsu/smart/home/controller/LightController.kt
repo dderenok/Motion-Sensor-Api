@@ -1,8 +1,8 @@
-package smart.home.project.controller
+package bsu.smart.home.controller
 
 import org.springframework.web.bind.annotation.*
-import smart.home.project.model.Light
-import smart.home.project.service.LightService
+import bsu.smart.home.model.Light
+import bsu.smart.home.service.LightService
 
 @RestController
 @RequestMapping("/light")
@@ -16,8 +16,8 @@ class LightController(private val lightService: LightService) {
     @GetMapping("/{status}")
     fun findByLight(@PathVariable status: Boolean) = lightService.findLightByStatus(status)
 
-    @GetMapping("/{id}")
-    fun updateLightStatus(@PathVariable id: Long) = lightService.updateLightStatus(id)
+    @PutMapping("/{name}")
+    fun updateLightStatus(@PathVariable name: String) = lightService.updateLightStatus(name)
 
     @PostMapping
     fun createLight(@RequestBody light: Light) = lightService.createLight(light)

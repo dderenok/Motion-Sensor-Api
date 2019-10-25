@@ -1,4 +1,4 @@
-package smart.home.project.config
+package bsu.smart.home.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry

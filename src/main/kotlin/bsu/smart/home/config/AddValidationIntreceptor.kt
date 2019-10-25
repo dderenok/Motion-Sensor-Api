@@ -1,4 +1,4 @@
-package smart.home.project.config
+package bsu.smart.home.config
 
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import javax.servlet.http.HttpServletRequest

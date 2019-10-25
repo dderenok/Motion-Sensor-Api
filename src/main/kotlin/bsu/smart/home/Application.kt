@@ -1,4 +1,4 @@
-package smart.home.project
+package bsu.smart.home
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan

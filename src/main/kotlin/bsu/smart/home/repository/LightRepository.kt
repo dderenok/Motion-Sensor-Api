@@ -1,13 +1,11 @@
-package smart.home.project.repository
+package bsu.smart.home.repository
 
 import org.springframework.data.repository.CrudRepository
-import smart.home.project.model.Light
+import bsu.smart.home.model.Light
 import java.util.*
 
 interface LightRepository : CrudRepository<Light, Long> {
     override fun findAll(): List<Light>
-
-    override fun findById(id: Long): Optional<Light>
 
     fun save(light: Optional<Light>)
 

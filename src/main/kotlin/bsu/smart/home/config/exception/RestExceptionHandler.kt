@@ -1,4 +1,4 @@
-package smart.home.project.config.exception
+package bsu.smart.home.config.exception
 
 import javassist.NotFoundException
 import org.springframework.http.HttpHeaders
