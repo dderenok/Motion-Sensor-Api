@@ -1,35 +1,42 @@
 package bsu.smart.home.service
 
-import org.springframework.stereotype.Service
 import bsu.smart.home.model.Light
 import bsu.smart.home.repository.LightRepository
+import org.springframework.stereotype.Service
 import javax.persistence.NonUniqueResultException
 import javax.transaction.Transactional
 
 @Service
 class LightService(
-    private val lightRepository: LightRepository
+        private var lightRepository: LightRepository
 ) {
     fun findAllLights() = lightRepository.findAll()
 
-    fun findLightByName(name: String) = lightRepository.findByName(name)
+    fun findLightById(id: Long) = lightRepository.findById(id).get()
 
     fun findLightByStatus(status: Boolean) = lightRepository.findByLightStatus(status)
 
     @Transactional
     fun createLight(light: Light) {
         try {
-            lightRepository.findByName(light.name!!)
+            lightRepository.findByName(light.name)
         } catch(ex: Exception) { throw NonUniqueResultException() }
 
         lightRepository.save(light)
     }
 
     @Transactional
-    fun updateLightStatus(name: String) {
-        val light = lightRepository.findByName(name)
-        light.lightStatus = !light.lightStatus
-        lightRepository.save(light)
+    fun updateLightStatus(id: Long) {
+        val updateLight = lightRepository.findById(id).get()
+        updateLight.lightStatus = !updateLight.lightStatus
+        lightRepository.save(updateLight)
+    }
+
+    @Transactional
+    fun updateLightName(id: Long, light: Light) {
+        val updateLight = lightRepository.findById(id).get()
+        updateLight.name = light.name
+        lightRepository.save(updateLight)
     }
 
     @Transactional

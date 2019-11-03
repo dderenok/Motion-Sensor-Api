@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
-@EnableJpaRepositories(basePackages = ["smart.home.project.repository"])
-@EntityScan("smart.home.project.model")
+@EnableJpaRepositories(basePackages = ["bsu.smart.home.repository"])
+@EntityScan("bsu.smart.home.model")
 @SpringBootApplication
 class Application
 
