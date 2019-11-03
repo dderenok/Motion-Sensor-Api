@@ -1,4 +1,4 @@
-package smart.home.project.model
+package bsu.smart.home.model
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -9,10 +9,10 @@ import javax.persistence.Id
 class Light(
     @Id
     @GeneratedValue
-    private val id: Long? = null,
+    val id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    var name: String? = null,
+    var name: String,
 
     var lightStatus: Boolean = false
 )

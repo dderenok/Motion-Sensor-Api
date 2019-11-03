@@ -1,7 +1,7 @@
-package smart.home.project.repository
+package bsu.smart.home.repository
 
+import bsu.smart.home.model.Light
 import org.springframework.data.repository.CrudRepository
-import smart.home.project.model.Light
 import java.util.*
 
 interface LightRepository : CrudRepository<Light, Long> {
