@@ -3,6 +3,8 @@ package bsu.smart.home.service
 import bsu.smart.home.model.Light
 import bsu.smart.home.repository.LightRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
+import java.util.UUID.randomUUID
 import javax.persistence.NonUniqueResultException
 import javax.transaction.Transactional
 
@@ -12,36 +14,35 @@ class LightService(
 ) {
     fun findAllLights() = lightRepository.findAll()
 
-    fun findLightById(id: Long) = lightRepository.findById(id).get()
+    fun findLight(guid: UUID) = lightRepository.findByGuid(guid)
 
-    fun findLightByStatus(status: Boolean) = lightRepository.findByLightStatus(status)
+    fun findLightByName(name: String) = lightRepository.findByName(name)
 
     @Transactional
-    fun createLight(light: Light) {
-        light.name?.let {
-            if (checkNameUnique(it)) lightRepository.save(light)
-            else throw NonUniqueResultException()
-        }
+    fun createLight(light: Light) = light.name?.let {
+        if (checkNameUnique(it)) lightRepository.save(
+                light.apply { guid = randomUUID() }
+        )
+        else throw NonUniqueResultException()
     }
 
     @Transactional
-    fun updateLightStatus(id: Long) {
-        val updateLight = lightRepository.findById(id).get()
-        updateLight.lightStatus = !updateLight.lightStatus
-        lightRepository.save(updateLight)
+    fun updateStatus(guid: UUID) = lightRepository.findByGuid(guid)?.let {
+        lightRepository.save(it.apply {
+            status = !status
+        })
     }
 
     @Transactional
-    fun updateLightName(id: Long, light: Light) {
-        val updateLight = lightRepository.findById(id).get()
-        updateLight.name = light.name
-        lightRepository.save(updateLight)
+    fun updateLight(guid: UUID, light: Light) = lightRepository.findByGuid(guid)?.let {
+        lightRepository.save(it.apply {
+            name = light.name
+            status = light.status
+        })
     }
 
     @Transactional
-    fun deleteLight(id: Long) {
-        lightRepository.deleteById(id)
-    }
+    fun deleteLight(guid: UUID) = lightRepository.deleteByGuid(guid)
 
     fun checkNameUnique(lightName: String) = !lightRepository.existsByName(lightName)
 }
