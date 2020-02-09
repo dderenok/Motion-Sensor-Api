@@ -14,4 +14,6 @@ interface LightRepository : CrudRepository<Light, Long> {
     fun findByName(name: String): Light
 
     fun findByLightStatus(status: Boolean): List<Light>
+
+    fun existsByName(name: String): Boolean
 }

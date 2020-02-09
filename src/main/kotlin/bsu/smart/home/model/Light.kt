@@ -1,18 +1,20 @@
 package bsu.smart.home.model
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
+import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
 @Entity
-class Light(
+@Table(
+    name = "light",
+    uniqueConstraints = [UniqueConstraint(name = "name", columnNames = ["name"])]
+)
+data class Light(
     @Id
     @GeneratedValue
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
-    var name: String,
+    @get:NotBlank
+    var name: String? = null,
 
     var lightStatus: Boolean = false
 )
