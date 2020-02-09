@@ -18,11 +18,10 @@ class LightService(
 
     @Transactional
     fun createLight(light: Light) {
-        try {
-            lightRepository.findByName(light.name)
-        } catch(ex: Exception) { throw NonUniqueResultException() }
-
-        lightRepository.save(light)
+        light.name?.let {
+            if (checkNameUnique(it)) lightRepository.save(light)
+            else throw NonUniqueResultException()
+        }
     }
 
     @Transactional
@@ -43,4 +42,6 @@ class LightService(
     fun deleteLight(id: Long) {
         lightRepository.deleteById(id)
     }
+
+    fun checkNameUnique(lightName: String) = !lightRepository.existsByName(lightName)
 }
