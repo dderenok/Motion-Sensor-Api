@@ -9,7 +9,7 @@
     </parent>
     <groupId>smart.home</groupId>
     <artifactId>project</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <name>Motion-Sensor-Api</name>
     <description>Project describe all operations necessary for light control</description>
 
