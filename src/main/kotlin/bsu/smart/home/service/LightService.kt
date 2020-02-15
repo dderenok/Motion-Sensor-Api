@@ -3,7 +3,10 @@ package bsu.smart.home.service
 import bsu.smart.home.config.exception.LightNotFoundException
 import bsu.smart.home.config.exception.LightNotUniqueException
 import bsu.smart.home.model.Light
+import bsu.smart.home.model.response.DeleteResponse
 import bsu.smart.home.repository.LightRepository
+import org.springframework.http.HttpStatus.OK
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -52,14 +55,19 @@ class LightService(
         } ?: throw LightNotFoundException(lightNotFoundMessage("guid", guid.toString()))
     }
 
+    // TODO: d.derenok
+    //      find better variant for response entity returning
     @Transactional
     fun deleteLight(guid: UUID) = lightRepository.findByGuid(guid)?.let {
-        lightRepository.deleteByGuid(guid)
+        lightRepository.deleteByGuid(guid).run {
+            ResponseEntity(DeleteResponse(lightDeleteMessage(guid.toString())), OK)
+        }
     } ?: throw LightNotFoundException(lightNotFoundMessage("guid", guid.toString()))
 
     fun checkNameUnique(lightName: String) = !lightRepository.existsByName(lightName)
 
     companion object {
         private fun lightNotFoundMessage(element: String, value: String) = "Light with $element '$value' not found"
+        private fun lightDeleteMessage(guid: String) = "Light with guid '$guid' successfully deleted"
     }
 }
