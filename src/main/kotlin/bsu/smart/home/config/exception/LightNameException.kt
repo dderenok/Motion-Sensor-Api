@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import java.lang.RuntimeException
 
 @ResponseStatus(code = BAD_REQUEST)
-class LightNotUniqueException(exceptionMessage: String = REASON) : RuntimeException(exceptionMessage) {
+class LightNameException(exceptionMessage: String = REASON) : RuntimeException(exceptionMessage) {
 
     companion object {
         const val REASON = "Light with such name already exist"
