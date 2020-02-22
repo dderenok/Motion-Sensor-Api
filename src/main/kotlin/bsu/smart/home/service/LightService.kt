@@ -1,7 +1,7 @@
 package bsu.smart.home.service
 
 import bsu.smart.home.config.exception.LightNotFoundException
-import bsu.smart.home.config.exception.LightNotUniqueException
+import bsu.smart.home.config.exception.LightNameException
 import bsu.smart.home.model.Light
 import bsu.smart.home.model.response.DeleteResponse
 import bsu.smart.home.repository.LightRepository
@@ -31,8 +31,8 @@ class LightService(
         if (checkNameUnique(it)) lightRepository.save(
                 light.apply { guid = randomUUID() }
         )
-        else throw LightNotUniqueException()
-    }
+        else throw LightNameException(lightNameUniqueMessage(it))
+    } ?: throw LightNameException(lightNullNameMessage())
 
     @Transactional
     fun updateStatus(guid: UUID) = lightRepository.findByGuid(guid)?.let {
@@ -41,17 +41,16 @@ class LightService(
         })
     }
 
-    // TODO: d.derenok
-    //      Refactor using not-nullable operator for light name
     @Transactional
     fun updateLight(guid: UUID, light: Light) {
         lightRepository.findByGuid(guid)?.let {
-            if (!checkNameUnique(light.name!!)) throw LightNotUniqueException()
-
-            lightRepository.save(it.apply {
-                name = light.name
+            light.name?.let { name ->
+                if (!checkNameUnique(light.name!!)) throw LightNameException(lightNameUniqueMessage(name))
+            }
+            it.apply {
+                light.name?.let { tempName -> name = tempName }
                 status = light.status
-            })
+            }.saveLight()
         } ?: throw LightNotFoundException(lightNotFoundMessage("guid", guid.toString()))
     }
 
@@ -66,8 +65,12 @@ class LightService(
 
     fun checkNameUnique(lightName: String) = !lightRepository.existsByName(lightName)
 
+    fun Light.saveLight() = lightRepository.save(this)
+
     companion object {
-        private fun lightNotFoundMessage(element: String, value: String) = "Light with $element '$value' not found"
-        private fun lightDeleteMessage(guid: String) = "Light with guid '$guid' successfully deleted"
+        private fun lightNotFoundMessage(element: String, value: String) = "Light with $element '$value' not found."
+        private fun lightNameUniqueMessage(name: String) = "Light with such name $name already exist."
+        private fun lightDeleteMessage(guid: String) = "Light with guid '$guid' successfully deleted."
+        private fun lightNullNameMessage() = "Light name cannot be null"
     }
 }
