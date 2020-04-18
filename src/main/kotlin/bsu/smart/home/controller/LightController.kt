@@ -1,6 +1,7 @@
 package bsu.smart.home.controller
 
 import bsu.smart.home.model.Light
+import bsu.smart.home.model.dto.LightDto
 import bsu.smart.home.service.LightService
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,7 +23,7 @@ class LightController(private val lightService: LightService) {
     @GetMapping("/{guid}")
     fun find(@PathVariable guid: UUID) = lightService.findLight(guid)
 
-    @GetMapping("filter")
+    @GetMapping("/filter")
     fun findLightByName(@RequestParam("name") name: String) = lightService.findLightByName(name)
 
     @PutMapping("/status/{guid}")
@@ -32,7 +33,7 @@ class LightController(private val lightService: LightService) {
     fun updateLight(@PathVariable guid: UUID, @RequestBody light: Light) = lightService.updateLight(guid, light)
 
     @PostMapping
-    fun createLight(@RequestBody light: Light) = lightService.createLight(light)
+    fun createLight(@RequestBody lightDto: LightDto) = lightService.createLight(lightDto)
 
     @DeleteMapping("/{guid}")
     fun deleteLight(@PathVariable guid: UUID) = lightService.deleteLight(guid)
