@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    password: superroot
+    url: jdbc:mysql://localhost:3306/motion_sensor
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    host: localhost
+    password: guest
+    port: 15672
+    username: guest
+sensor:
+  create:
+    exchange: sensor-create-exchange
+    queue: sensor-create-queue
+  delete:
+    exchange: sensor-delete-exchange
+    queue: sensor-delete-queue
+server:
+  port: 8083
