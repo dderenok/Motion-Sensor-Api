@@ -30,7 +30,7 @@ class LightController(private val lightService: LightService) {
     fun updateLightStatus(@PathVariable guid: UUID) = lightService.updateStatus(guid)
 
     @PutMapping("/{guid}")
-    fun updateLight(@PathVariable guid: UUID, @RequestBody light: Light) = lightService.updateLight(guid, light)
+    fun updateLight(@PathVariable guid: UUID, @RequestBody lightDto: LightDto) = lightService.updateLight(guid, lightDto)
 
     @PostMapping
     fun createLight(@RequestBody lightDto: LightDto) = lightService.createLight(lightDto)
