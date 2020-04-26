@@ -64,14 +64,14 @@ class LightService(
     }
 
     @Transactional
-    fun updateLight(guid: UUID, light: Light) =
+    fun updateLight(guid: UUID, lightDto: LightDto) =
         lightRepository.findByGuid(guid)?.let {
-            light.name?.let { name ->
-                if (!checkNameUnique(light.name!!)) throw LightNameException(lightNameUniqueMessage(name))
+            lightDto.name?.let { name ->
+                if (!checkNameUnique(lightDto.name!!)) throw LightNameException(lightNameUniqueMessage(name))
             }
             it.apply {
-                light.name?.let { tempName -> name = tempName }
-                status = light.status
+                lightDto.name?.let { tempName -> name = tempName }
+                status = lightDto.status
             }.saveLight()
         } ?: throw LightNotFoundException(lightNotFoundMessage("guid", guid.toString()))
 
