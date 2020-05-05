@@ -4,7 +4,7 @@ import bsu.smart.home.model.Light
 import java.io.Serializable
 import java.util.UUID
 
-class LightDto(
+data class LightDto(
     var guid: UUID? = null,
     var name: String? = null,
     var status: Boolean = false,

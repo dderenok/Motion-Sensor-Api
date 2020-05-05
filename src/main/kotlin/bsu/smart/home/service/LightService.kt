@@ -26,15 +26,25 @@ class LightService(
     @Autowired
     private lateinit var rabbitTemplate: RabbitTemplate
 
-    fun LightDto.createLightNotification() = rabbitTemplate.apply {
+    fun createLightNotification(sensorInfo: List<String>) = rabbitTemplate.apply {
         setExchange(createSensorExchange)
-    }.convertAndSend(this)
+    }.convertAndSend(sensorInfo)
 
     fun deleteNotification(guid: UUID) = rabbitTemplate.apply {
         setExchange(deleteSensorExchange)
     }.convertAndSend(guid.toString())
 
     fun findAllLights() = lightRepository.findAll()
+
+    fun findAllByGuids(guids: List<UUID>): MutableList<Light> {
+        val lights: MutableList<Light> = mutableListOf()
+        guids.forEach {
+            lightRepository.findByGuid(it)?.let { light ->
+                lights.add(light)
+            }
+        }
+        return lights
+    }
 
     fun findLight(guid: UUID) =
             lightRepository.findByGuid(guid) ?:
@@ -49,7 +59,12 @@ class LightService(
         if (checkNameUnique(it)) {
             lightDto
                 .apply { guid = randomUUID() }
-                .createLightNotification()
+
+            createLightNotification(listOf(
+                lightDto.guid.toString(),
+                lightDto.roomGuid.toString(),
+                LIGHT_SENSOR
+            ))
 
             toLight(lightDto).saveLight()
         }
@@ -94,5 +109,6 @@ class LightService(
         private fun lightNameUniqueMessage(name: String) = "Light with such name $name already exist."
         private fun lightDeleteMessage(guid: String) = "Light with guid '$guid' successfully deleted."
         private fun lightNullNameMessage() = "Light name cannot be null"
+        private const val LIGHT_SENSOR = "LIGHT"
     }
 }
