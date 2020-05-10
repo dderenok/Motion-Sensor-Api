@@ -27,5 +27,8 @@ data class Light(
     @get:NotBlank
     var name: String? = null,
 
-    var status: Boolean = false
+    var status: Boolean = false,
+
+    @Column(columnDefinition = "BINARY(16)")
+    var roomGuid: UUID? = null
 )

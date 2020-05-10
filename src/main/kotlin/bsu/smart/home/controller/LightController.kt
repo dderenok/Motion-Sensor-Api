@@ -32,11 +32,15 @@ class LightController(private val lightService: LightService) {
     @GetMapping("/list")
     fun findAllByGuids(@RequestParam("guids") guids: List<UUID>) = lightService.findAllByGuids(guids)
 
+    @GetMapping("/available-to-attach")
+    fun findAvailableToRoomAttach() = lightService.findAvailableToRoomAttach()
+
     @GetMapping("/filter")
     fun findLightByName(@RequestParam("name") name: String) = lightService.findLightByName(name)
 
-    @PutMapping("/status/{guid}")
-    fun updateLightStatus(@PathVariable guid: UUID) = lightService.updateStatus(guid)
+    @PutMapping("/status/{guid}/{roomGuid}")
+    fun updateLightStatus(@PathVariable guid: UUID, @PathVariable roomGuid: UUID) =
+            lightService.updateStatus(guid, roomGuid)
 
     @PutMapping("/{guid}")
     fun updateLight(@PathVariable guid: UUID, @RequestBody lightDto: LightDto) = lightService.updateLight(guid, lightDto)

@@ -2,11 +2,13 @@ package bsu.smart.home.service
 
 import bsu.smart.home.config.exception.LightNotFoundException
 import bsu.smart.home.config.exception.LightNameException
+import bsu.smart.home.config.rabbitmq.RabbitConfiguration
 import bsu.smart.home.model.Light
 import bsu.smart.home.model.dto.LightDto
 import bsu.smart.home.model.dto.LightDto.Companion.toLight
 import bsu.smart.home.model.response.DeleteResponse
 import bsu.smart.home.repository.LightRepository
+import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.UUID
 import java.util.UUID.randomUUID
+import java.util.logging.Logger
 import javax.transaction.Transactional
 
 @Service
@@ -25,6 +28,46 @@ class LightService(
 ) {
     @Autowired
     private lateinit var rabbitTemplate: RabbitTemplate
+
+    var logger: Logger = Logger.getLogger(RabbitConfiguration::class.java.toString())
+
+    @RabbitListener(queues = [
+        "\${room.attach-light.queue}"
+    ])
+    @Transactional
+    fun attachLightToRoomListener(sensorInfo: List<String>) {
+        logger.info { "Attach notification received from Room with guid ${sensorInfo[1]}" }
+
+        unplackAvailabillity(sensorInfo[0])?.let {
+            val light = lightRepository.findByGuid(it)
+            light?.roomGuid = unplackAvailabillity(sensorInfo[1])
+        }
+    }
+
+    @RabbitListener(queues = [
+        "\${room.remove-light.queue}"
+    ])
+    @Transactional
+    fun removeTemperatureFromRoomListener(lightGuids: List<String>?) {
+        logger.info { "Unattach notification from Room for Light sensors with guids: $lightGuids" }
+
+        lightGuids?.forEach { guid ->
+            unplackAvailabillity(guid)?.let {
+                val light = lightRepository.findByGuid(it)
+                light?.roomGuid = null
+            }
+        }
+    }
+
+    /**
+     *  Checking light guids transfered through rabbit queues on correction type.
+     */
+    private fun unplackAvailabillity(roomGuidDto: String): UUID? {
+        if (roomGuidDto.length == 36) {
+            return UUID.fromString(roomGuidDto)
+        }
+        return null
+    }
 
     fun createLightNotification(sensorInfo: List<String>) = rabbitTemplate.apply {
         setExchange(createSensorExchange)
@@ -44,6 +87,10 @@ class LightService(
             }
         }
         return lights
+    }
+
+    fun findAvailableToRoomAttach() = lightRepository.findAll().filter {
+        it.roomGuid == null
     }
 
     fun findLight(guid: UUID) =
@@ -72,7 +119,7 @@ class LightService(
     } ?: throw LightNameException(lightNullNameMessage())
 
     @Transactional
-    fun updateStatus(guid: UUID) = lightRepository.findByGuid(guid)?.let {
+    fun updateStatus(guid: UUID, roomGuid: UUID) = lightRepository.findByGuid(guid)?.let {
         lightRepository.save(it.apply {
             status = !status
         })
@@ -87,6 +134,12 @@ class LightService(
             it.apply {
                 lightDto.name?.let { tempName -> name = tempName }
                 status = lightDto.status
+                roomGuid = lightDto.roomGuid
+                createLightNotification(listOf(
+                    guid.toString(),
+                    roomGuid.toString(),
+                    LIGHT_SENSOR
+                ))
             }.saveLight()
         } ?: throw LightNotFoundException(lightNotFoundMessage("guid", guid.toString()))
 

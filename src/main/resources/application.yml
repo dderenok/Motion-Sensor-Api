@@ -18,5 +18,12 @@ sensor:
   delete:
     exchange: sensor-delete-exchange
     queue: sensor-delete-queue
+room:
+  attach-light:
+    exchange: room-attach-light-exchange
+    queue: room-attach-light-queue
+  remove-light:
+    exchange: room-remove-light-exchange
+    queue: room-remove-light-queue
 server:
   port: 8083
