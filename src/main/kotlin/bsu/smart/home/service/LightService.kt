@@ -1,7 +1,7 @@
 package bsu.smart.home.service
 
-import bsu.smart.home.config.exception.LightNotFoundException
 import bsu.smart.home.config.exception.LightNameException
+import bsu.smart.home.config.exception.LightNotFoundException
 import bsu.smart.home.config.rabbitmq.RabbitConfiguration
 import bsu.smart.home.model.Light
 import bsu.smart.home.model.dto.LightDto
@@ -24,12 +24,44 @@ import javax.transaction.Transactional
 class LightService(
     private var lightRepository: LightRepository,
     @Value("\${sensor.create.exchange}") private val createSensorExchange: String,
-    @Value("\${sensor.delete.exchange}") private val deleteSensorExchange: String
+    @Value("\${sensor.delete.exchange}") private val deleteSensorExchange: String,
+    @Value("\${spring.cloud.stream.bindings.input.destination}") private val mqttTopic: String
 ) {
     @Autowired
     private lateinit var rabbitTemplate: RabbitTemplate
 
     var logger: Logger = Logger.getLogger(RabbitConfiguration::class.java.toString())
+
+    /**
+     *  Send notification to Mqtt server about update Light status.
+     */
+    fun sendUpdateSensorStatusToHardware(sensorGuid: String)  = rabbitTemplate.apply {
+        setExchange(mqttTopic)
+    }.convertAndSend(listOf(LIGHT_SENSOR, sensorGuid))
+
+    /**
+     *  Listen Light sensor response about update status.
+     */
+    @RabbitListener(queues = ["\${sensor.response.output}"])
+    fun updateLightHardwareStatus(responseStatus: List<String>) {
+        logger.info { "Receive message from light hardware sensor about update status"}
+        if (responseStatus[0] == LIGHT_SENSOR) {
+            when (responseStatus[2]) {
+                "1" -> logger.info { "Status successfully updated" }
+                "0" -> {
+                    logger.warning { "Status does no updated successfully, return to last status"}
+                    val sensorGuid = unplackAvailabillity(responseStatus[1])
+                    if (sensorGuid != null) {
+                        lightRepository.findByGuid(sensorGuid)?.let {
+                            it.status = !it.status
+                        }
+                    } else {
+                        logger.warning { "Status does no updated successfully, because guid is not correct"}
+                    }
+                }
+            }
+        }
+    }
 
     @RabbitListener(queues = [
         "\${room.attach-light.queue}"
@@ -120,6 +152,7 @@ class LightService(
 
     @Transactional
     fun updateStatus(guid: UUID, roomGuid: UUID) = lightRepository.findByGuid(guid)?.let {
+        sendUpdateSensorStatusToHardware(it.guid.toString())
         lightRepository.save(it.apply {
             status = !status
         })

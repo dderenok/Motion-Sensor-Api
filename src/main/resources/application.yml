@@ -1,4 +1,35 @@
 spring:
+  cloud:
+    stream:
+      bindings:
+        input:
+          destination: amq.topic
+          binder: rabbit
+          group: messages-consumer-group
+          consumer:
+            concurrency: 1
+        output:
+          destination: sensor.response.topic
+          binder: rabbit
+          group: messages-consumer-group
+          consumer:
+            concurrency: 1
+      rabbit:
+        bindings:
+          input:
+            consumer:
+              durableSubscription: true
+              declareExchange: true
+              exchangeDurable: true
+              exchangeType: topic
+              queueNameGroupOnly: true
+          output:
+            consumer:
+              durableSubscription: true
+              declareExchange: true
+              exchangeDurable: true
+              exchangeType: topic
+              queueNameGroupOnly: true
   datasource:
     password: superroot
     url: jdbc:mysql://localhost:3306/motion_sensor
@@ -18,6 +49,8 @@ sensor:
   delete:
     exchange: sensor-delete-exchange
     queue: sensor-delete-queue
+  response:
+    output: sensor-response-output-queue
 room:
   attach-light:
     exchange: room-attach-light-exchange
